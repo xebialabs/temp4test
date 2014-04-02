@@ -24,7 +24,7 @@
         <amps.version>4.0</amps.version>           <!-- 4.1.7  (3.11 works) -->
         <plugin.testrunner.version>1.1</plugin.testrunner.version>
 	<!-- property name is used by dependency updater do not change -->
-	<engineVersion>1.0.0</engineVersion>
+	<engineVersion>1.0.1</engineVersion>
     </properties>
 
     <dependencies>
