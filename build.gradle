@@ -39,3 +39,105 @@ task status(type: GitStatus) {
 task release() << {
 	
 }
+
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.internal.storage.file.FileRepository
+import org.gradle.api.GradleException
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+class ReleasesPluginPlugin implements Plugin<Project> {
+    private static final Logger log = LoggerFactory.getLogger(ReleasesPluginPlugin.class)
+
+    enum ReleaseVersion { ALPHA, BETA, RELEASE }
+
+    private Project rootProject
+    private ReleaseVersion releaseVersion
+    private Git repo
+    private String versionString
+
+    @Override
+    void apply(Project project) {
+        if (!project.tasks.names.containsAll(["clean", "build", "uploadArchives", "uploadDocumentation"])) {
+            println "Cannot apply releases-plugin to " + project.name +
+                    ": tasks [clean, build, uploadArchives, uploadDocumentation] must all be present"
+            return
+        }
+
+        def release_task = project.rootProject.tasks.create("release")
+        release_task.configure {
+            rootProject = project.rootProject
+            releaseVersion =
+                    project.hasProperty("alpha") ? ReleaseVersion.ALPHA :
+                    project.hasProperty("beta") ? ReleaseVersion.BETA :
+                    project.hasProperty("release") ? ReleaseVersion.RELEASE :
+                    null
+            log.info("Release version " + releaseVersion + " requested")
+            release_task.doLast {
+                if (!releaseVersion) {
+                    println "What kind of release do you want? Please specify -Palpha, -Pbeta, or -Prelease"
+                    return
+                }
+                release(releaseVersion)
+            }
+        }
+    }
+
+    def release(ReleaseVersion releaseVersion) {
+        repo = new Git(new FileRepository(rootProject.rootDir))
+        ensureCleanRepo()
+        gitPullRebase()
+        setProjectVersion()
+        doUpload project
+        gitCommitAndTagReleasedVersion()
+        bumpProjectVersion()
+        gitCommitNextVersion()
+        gitPush()
+    }
+
+    def ensureCleanRepo() {
+        if (!(repo.status().call().clean)) {
+            throw new GradleException("You have outstanding work. Please commit or stash before releasing.")
+        }
+    }
+
+    def gitPullRebase() {
+        try {
+            repo.pull().setRebase(true).call()
+        } catch (Exception e) {
+            throw new GradleException("git pull --rebase failed", e)
+        }
+    }
+
+    def setProjectVersion() {
+        // TODO!
+        // this.versionString = sump'n'sump'n'.
+    }
+
+    def doUpload() {
+        rootProject.task("clean").execute()
+        rootProject.task("build").execute()
+        rootProject.task("uploadArchives").execute()
+        rootProject.task("uploadDocumentation").execute()
+    }
+
+    def gitCommitAndTagReleasedVersion(Git repo) {
+        def version = "${rootProject.name}-${versionString}"
+        try {
+            repo.commit().setMessage("Releasing ${version}").call()
+            repo.tag().setMessage(version)
+        } catch(Exception e) {
+            throw new GradleException("git commit or git tag failed", e)
+        }
+    }
+
+    def bumpProjectVersion() {
+        // TODO!
+    }
+
+    def gitCommitNextVersion() {
+
+    }
+}
