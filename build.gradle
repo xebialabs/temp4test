@@ -18,33 +18,35 @@ repositories {
 
 buildscript {
   repositories { mavenCentral() }
-  dependencies { classpath 'org.ajoberstar:gradle-git:0.6.3' }
+  dependencies {
+//      classpath 'org.ajoberstar:gradle-git:0.6.3'
+      classpath 'org.eclipse.jgit:org.eclipse.jgit:3.3.1.201403241930-r'
+  }
 }
 
 dependencies {
-  compile "com.typesafe:config:1.2.0"
-  compile 'org.eclipse.jgit:org.eclipse.jgit:3.3.0.201403021825-r'
+    compile localGroovy()
+    compile gradleApi()
+    compile "com.typesafe:config:1.2.0"
+    compile 'org.eclipse.jgit:org.eclipse.jgit:3.3.1.201403241930-r'
 }
 
-import org.ajoberstar.gradle.git.tasks.*
+//import org.ajoberstar.gradle.git.tasks.*
+//
+//task tag(type: GitTag) {
+//    tagName = version
+//    message = "Release of ${version}"
+//}
+//
+//task status(type: GitStatus) {
+//}
 
-task tag(type: GitTag) {
-    tagName = version
-    message = "Release of ${version}"
-}
+task uploadArchives
+task uploadDocumentation
 
-task status(type: GitStatus) {
-}
-
-task release() << {
-	
-}
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import org.gradle.api.GradleException
-import org.gradle.api.Plugin
-import org.gradle.api.Project
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -53,13 +55,12 @@ class ReleasesPluginPlugin implements Plugin<Project> {
 
     enum ReleaseVersion { ALPHA, BETA, RELEASE }
 
-    private Project rootProject
-    private ReleaseVersion releaseVersion
     private Git repo
     private String versionString
 
     @Override
     void apply(Project project) {
+        log.warn("Applying ReleasesPluginPlugin to " + project.name)
         if (!project.tasks.names.containsAll(["clean", "build", "uploadArchives", "uploadDocumentation"])) {
             println "Cannot apply releases-plugin to " + project.name +
                     ": tasks [clean, build, uploadArchives, uploadDocumentation] must all be present"
@@ -68,24 +69,24 @@ class ReleasesPluginPlugin implements Plugin<Project> {
 
         def release_task = project.rootProject.tasks.create("release")
         release_task.configure {
-            rootProject = project.rootProject
-            releaseVersion =
+            ext.rootProject = project.rootProject
+            ext.releaseVersion =
                     project.hasProperty("alpha") ? ReleaseVersion.ALPHA :
                     project.hasProperty("beta") ? ReleaseVersion.BETA :
                     project.hasProperty("release") ? ReleaseVersion.RELEASE :
                     null
-            log.info("Release version " + releaseVersion + " requested")
+            log.info("Release version ${releaseVersion} requested")
             release_task.doLast {
                 if (!releaseVersion) {
                     println "What kind of release do you want? Please specify -Palpha, -Pbeta, or -Prelease"
                     return
                 }
-                release(releaseVersion)
+                doRelease()
             }
         }
     }
 
-    def release(ReleaseVersion releaseVersion) {
+    def doRelease() {
         repo = new Git(new FileRepository(rootProject.rootDir))
         ensureCleanRepo()
         gitPullRebase()
@@ -141,3 +142,5 @@ class ReleasesPluginPlugin implements Plugin<Project> {
 
     }
 }
+
+apply plugin: ReleasesPluginPlugin
