@@ -1,8 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-version = '1.1.0-SNAPSHOT'
-// version = 1.1.0
+version = '1.1.0'
 
 repositories {
   mavenLocal()
@@ -19,39 +18,126 @@ repositories {
 buildscript {
   repositories { mavenCentral() }
   dependencies {
-//      classpath 'org.ajoberstar:gradle-git:0.6.3'
-      classpath 'org.eclipse.jgit:org.eclipse.jgit:2.0.0.201206130900-r'
+    classpath 'org.eclipse.jgit:org.eclipse.jgit:2.0.0.201206130900-r'
+    classpath 'com.typesafe:config:1.2.0'
   }
 }
 
-dependencies {
-    compile localGroovy()
-    compile gradleApi()
-    compile "com.typesafe:config:1.2.0"
-    compile 'org.eclipse.jgit:org.eclipse.jgit:2.0.0.201206130900-r'
+configurations {
+  // configuration used by plugins to enumerate jars that need to be added to the distribution zip
+  distBundle
 }
 
-//import org.ajoberstar.gradle.git.tasks.*
-//
-//task tag(type: GitTag) {
-//    tagName = version
-//    message = "Release of ${version}"
-//}
-//
-//task status(type: GitStatus) {
-//}
+dependencies {
+  compile 'org.eclipse.jgit:org.eclipse.jgit:2.0.0.201206130900-r'
+  // snapshot for testing
+  compile 'com.xebialabs.deployit:engine-api:4.0.1-SNAPSHOT'
+  // alpha for testing
+  compile 'com.xebialabs.deployit:engine-api:4.1.0-alpha-1'
 
-task uploadArchives
-task uploadDocumentation
+  // 
+  distBundle 'com.xebialabs.deployit:engine-api:4.0.1-SNAPSHOT'
+  // alpha for testing
+  distBundle 'com.xebialabs.deployit:engine-spi:4.1.0-alpha-1'
+}
 
+gradle.taskGraph.whenReady { taskGraph ->
+  // append snapshot for non release builds
+  if (!taskGraph.hasTask(':release')) {
+    version += '-SNAPSHOT'
+  }
+  // TODO: for alpha we could append alpha and read the alpha number from a file
+}
+
+task distribution << {
+  println "Building distribution (pretend)"
+}
+
+task checkRepositoryIsClean(type: CheckRepoClean ) {
+  description = 'Check that the git repository is clean.'
+  dryRun = true
+  group = 'Verification'
+  gitDir = project.file(project.rootProject.projectDir.path + "/.git")
+   if (!gitDir.exists()) {
+    throw GradleException("Cannot release from a non version controlled tree.")
+  }
+}
+
+task checkNoSnapshotDependencies(type: CheckConfiguration) {
+  configuration = configurations.compile
+}
+
+task release {
+  group = 'Release'
+  description = "Do a release."
+  // distribution task must be configurable since it's named differently in deployit/package project
+  dependsOn build, distribution, checkRepositoryIsClean, checkNoSnapshotDependencies
+  doFirst {
+    // could do repo clean check also in doFirst, has benefit that we can do all the checks and then abort
+    // in stead of failing at the first check task
+  }
+  doLast {
+
+  }
+}
+
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.storage.file.FileRepository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.TaskAction
+
+class CheckRepoClean extends DefaultTask {
+  File gitDir
+  boolean dryRun = false
+
+  @TaskAction
+  def checkClean() {
+    FileRepository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
+
+    def status = new Git(repo).status().call()
+    if (!status.isClean()) {
+      if(dryRun) {
+        println("The repo ${repo} is not clean. Please commit all changes before doing a release.")
+      } else {
+        throw new IllegalStateException("The repo ${repo} is not clean. Please commit all changes before doing a release.")
+      }
+    }
+  }
+}
+
+class CheckConfiguration extends DefaultTask {
+  // TODO do we need a list of configurations ?
+  Configuration configuration
+
+  @TaskAction
+  def checkArtifacts() {
+    logger.info("Checking configuration $configuration")
+    configuration.resolvedConfiguration.resolvedArtifacts.each { ResolvedArtifact artifact ->
+      int errors = 0
+      def version = artifact.moduleVersion.id.version
+      def name = artifact.moduleVersion.id.name
+      def group = artifact.moduleVersion.id.group
+      // println "Checking $name:$version"
+      if( version ==~ /.*alpha.*/ || version ==~ /.*SNAPSHOT.*/ ) {
+        errors++
+        // TODO include classifier
+        logger.error("Found non release dependency ${group}:${name}:${version}")
+      }
+    }
+    if(errors > 0) {
+      throw new GradleException("Invalid artifact dependencies found")
+    }
+  }
+}
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class ReleasesPluginPlugin implements Plugin<Project> {
-    private static final Logger log = LoggerFactory.getLogger(ReleasesPluginPlugin.class)
+class ReleasePluginPlugin implements Plugin<Project> {
+    private static final Logger log = LoggerFactory.getLogger(ReleasePluginPlugin.class)
 
     enum ReleaseVersion { ALPHA, BETA, RELEASE }
 
@@ -62,7 +148,7 @@ class ReleasesPluginPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        log.warn("Applying ReleasesPluginPlugin to " + project.name)
+        log.warn("Applying ReleasePluginPlugin to " + project.name)
         if (!project.tasks.names.containsAll(["clean", "build", "uploadArchives", "uploadDocumentation"])) {
             println "Cannot apply releases-plugin to " + project.name +
                     ": tasks [clean, build, uploadArchives, uploadDocumentation] must all be present"
@@ -148,4 +234,4 @@ class ReleasesPluginPlugin implements Plugin<Project> {
     }
 }
 
-apply plugin: ReleasesPluginPlugin
+apply plugin: ReleasePluginPlugin
