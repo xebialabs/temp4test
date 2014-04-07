@@ -120,13 +120,13 @@ task releaseMinor(type: CreateTag) {
         return true;
       }
       public boolean isInteractive() {
-          return true;
+        return false;
       }
       public boolean get(URIish uri, CredentialItem... items) throws UnsupportedCredentialItem {
         items.each {
           if (it instanceof CredentialItem.StringType) {
             CredentialItem.StringType st = (CredentialItem.StringType) it
-            logger.debug("CredentialItem promptText: '${st.promptText}'")
+            // logger.debug("CredentialItem promptText: '${st.promptText}'")
             st.setValue(new String(pass));
           }
         }
