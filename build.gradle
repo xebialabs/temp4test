@@ -137,7 +137,7 @@ task releaseMinor(type: CreateTag) {
     FileRepository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
     def git = new Git(repo)
     git.add().addFilepattern('version.properties').call();
-    git.commit().setMessage(tag.toString()).call();
+    git.commit().setMessage("${tag}".toString()).call();
     git.push().setCredentialsProvider(cp).setPushTags().call();
   }
 }
