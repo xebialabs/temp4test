@@ -115,6 +115,7 @@ task releaseMinor(type: CreateTag) {
     file('version.properties').withWriter  { w ->
       versionProps.store(w, 'version info')
     }
+    def pass = project.getProperty('gitPassword')
     CredentialsProvider cp = new CredentialsProvider() {
       public boolean supports(CredentialItem... items) {
         return true;
@@ -127,7 +128,7 @@ task releaseMinor(type: CreateTag) {
           if (it instanceof CredentialItem.StringType) {
             CredentialItem.StringType st = (CredentialItem.StringType) it
             // logger.debug("CredentialItem promptText: '${st.promptText}'")
-            st.setValue(new String(pass));
+            st.setValue(pass);
           }
         }
         return true;
