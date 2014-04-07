@@ -115,6 +115,7 @@ task releaseMinor(type: CreateTag) {
     file('version.properties').withWriter  { w ->
       versionProps.store(w, 'version info')
     }
+    def message = "New version ${project.name}-${versionProps.version}"
     def pass = project.getProperty('gitPassword')
     CredentialsProvider cp = new CredentialsProvider() {
       public boolean supports(CredentialItem... items) {
@@ -137,7 +138,7 @@ task releaseMinor(type: CreateTag) {
     FileRepository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
     def git = new Git(repo)
     git.add().addFilepattern('version.properties').call();
-    git.commit().setMessage("${tag}".toString()).call();
+    git.commit().setMessage(message).call();
     git.push().setCredentialsProvider(cp).setPushTags().call();
   }
 }
@@ -152,6 +153,24 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+abstract class GitTask extends DefaultTask {
+  File gitDir = project.file(project.rootProject.projectDir.path)
+  Closure action = { }
+
+  @TaskAction
+  def doGitAction() {
+    if (!gitDir.exists()) {
+      throw GradleException("No git repository at ${gitDir}")
+    }
+    Git git = Git.open(gitDir)
+    try {
+      action git
+    } finally {
+      git.close()
+    }
+  }
+}
+
 class CheckRepoClean extends DefaultTask {
   File gitDir
   boolean dryRun = false
@@ -160,8 +179,8 @@ class CheckRepoClean extends DefaultTask {
   def checkClean() {
     // TODO repo needs close call in finally ? Would that work with the groovy with construct ?
     FileRepository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
-
-    def status = new Git(repo).status().call()
+    def git = new Git(repo)
+    def status = git.status().call()
     if (!status.isClean()) {
       if(dryRun) {
         println("The repo ${repo} is not clean. Please commit all changes before doing a release.")
