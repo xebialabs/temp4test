@@ -1,7 +1,11 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-version = '1.1.0'
+Properties versionProps = new Properties()
+file('version.properties').withReader { r ->
+  versionProps.load(r)
+  version = versionProps.get('version')
+}
 
 repositories {
   mavenLocal()
@@ -33,7 +37,7 @@ dependencies {
   // snapshot for testing
   compile 'com.xebialabs.deployit:engine-api:4.0.1-SNAPSHOT'
   // alpha for testing
-  compile 'com.xebialabs.deployit:engine-api:4.1.0-alpha-1'
+  compile 'com.xebialabs.deployit:engine-spi:4.1.0-alpha-1'
 
   // 
   distBundle 'com.xebialabs.deployit:engine-api:4.0.1-SNAPSHOT'
@@ -53,7 +57,7 @@ task distribution << {
   println "Building distribution (pretend)"
 }
 
-task checkRepositoryIsClean(type: CheckRepoClean ) {
+task checkRepositoryIsClean(type: CheckRepoClean) {
   description = 'Check that the git repository is clean.'
   dryRun = true
   group = 'Verification'
@@ -63,25 +67,67 @@ task checkRepositoryIsClean(type: CheckRepoClean ) {
   }
 }
 
+task checkReleaseTagIsAbsent(type: CheckTagAbsent) {
+  tag = { -> "${project.name}-${project.version}" }
+  description = "Check that the release tag is absent."
+  group = 'Release'
+  gitDir = project.file(project.rootProject.projectDir.path + "/.git")
+  if (!gitDir.exists()) {
+    throw GradleException("Cannot release from a non version controlled tree.")
+  }
+}
+
+task createReleaseTag(type: CreateTag) {
+  tag = { -> "${project.name}-${project.version}" }
+  description = "Create release tag."
+  group = 'Release'
+  gitDir = project.file(project.rootProject.projectDir.path + "/.git")
+  if (!gitDir.exists()) {
+    throw GradleException("Cannot release from a non version controlled tree.")
+  }
+}
+
 task checkNoSnapshotDependencies(type: CheckConfiguration) {
   configuration = configurations.compile
 }
 
-task release {
+task releaseMinor(type: CreateTag) {
   group = 'Release'
-  description = "Do a release."
+  description = "Build current version, upload it, tag it."
+  gitDir = project.file(project.rootProject.projectDir.path + "/.git")
+  tag = { -> "${project.name}-${project.version}" }
+
   // distribution task must be configurable since it's named differently in deployit/package project
-  dependsOn build, distribution, checkRepositoryIsClean, checkNoSnapshotDependencies
+  dependsOn build, distribution
+  // before building distribution hook up the check tasks
+  distribution.dependsOn checkReleaseTagIsAbsent, checkRepositoryIsClean //, checkNoSnapshotDependencies
   doFirst {
     // could do repo clean check also in doFirst, has benefit that we can do all the checks and then abort
     // in stead of failing at the first check task
   }
   doLast {
+    def vps = versionProps.version.split('\\.')
+    minor = vps[2] as int
+    minor++
+    vps[2] = minor as String
+    versionProps.version = vps.join('.')
+    file('version.properties').withWriter  { w ->
+      versionProps.store(w, 'version info')
+    }
 
+    FileRepository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
+    def git = new Git(repo)
+    git.add().addFilepattern('version.properties').call();
+    git.commit().setMessage(tag).call();
+    git.push().call();
   }
 }
 
+
+
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.storage.file.FileRepository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.gradle.api.DefaultTask
@@ -93,6 +139,7 @@ class CheckRepoClean extends DefaultTask {
 
   @TaskAction
   def checkClean() {
+    // TODO repo needs close call in finally ? Would that work with the groovy with construct ?
     FileRepository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
 
     def status = new Git(repo).status().call()
@@ -106,22 +153,62 @@ class CheckRepoClean extends DefaultTask {
   }
 }
 
+class CheckTagAbsent extends DefaultTask {
+  File gitDir
+  def tag
+
+  @TaskAction
+  def checkClean() {
+    println "Checking for absence of tag $tag"
+    Repository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
+    try {
+      List<Ref> call = new Git(repo).tagList().call();
+      for (Ref ref : call) {
+        println "Checking tag name=${ref.name} objId=${ref.objectId.name}"
+        if(ref.name == "${tag}") { // using gstring interpolation so a closure will work
+          throw GradleException("Tag '${tag}' already exists. Aborting.")
+        }
+      }
+    } finally {
+      repo.close();
+    }
+  }
+}
+
+class CreateTag extends DefaultTask {
+  File gitDir
+  def tag
+
+  @TaskAction
+  def checkClean() {
+    println "Creating tag $tag"
+    Repository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
+    Git git = new Git(repo)
+    try {
+      git.tag().setName("$tag").call();
+    } finally {
+      repo.close();
+    }
+  }
+}
+
 class CheckConfiguration extends DefaultTask {
-  // TODO do we need a list of configurations ?
+  // TODO do we need a list of configurations compile + distBundle ?
   Configuration configuration
 
   @TaskAction
   def checkArtifacts() {
     logger.info("Checking configuration $configuration")
+    int errors = 0
     configuration.resolvedConfiguration.resolvedArtifacts.each { ResolvedArtifact artifact ->
-      int errors = 0
       def version = artifact.moduleVersion.id.version
       def name = artifact.moduleVersion.id.name
       def group = artifact.moduleVersion.id.group
       // println "Checking $name:$version"
+      // TODO this should be configurable maybe list of Patterns depending on the release task
       if( version ==~ /.*alpha.*/ || version ==~ /.*SNAPSHOT.*/ ) {
         errors++
-        // TODO include classifier
+        // TODO include classifier (and more ?)
         logger.error("Found non release dependency ${group}:${name}:${version}")
       }
     }
