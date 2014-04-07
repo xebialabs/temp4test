@@ -47,7 +47,7 @@ dependencies {
 
 gradle.taskGraph.whenReady { taskGraph ->
   // append snapshot for non release builds
-  if (!taskGraph.hasTask(':release')) {
+  if (!taskGraph.hasTask(':releaseMinor')) {
     version += '-SNAPSHOT'
   }
   // TODO: for alpha we could append alpha and read the alpha number from a file
@@ -107,7 +107,7 @@ task releaseMinor(type: CreateTag) {
   }
   doLast {
     def vps = versionProps.version.split('\\.')
-    minor = vps[2] as int
+    def minor = vps[2] as int
     minor++
     vps[2] = minor as String
     versionProps.version = vps.join('.')
@@ -118,12 +118,10 @@ task releaseMinor(type: CreateTag) {
     FileRepository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
     def git = new Git(repo)
     git.add().addFilepattern('version.properties').call();
-    git.commit().setMessage(tag).call();
+    git.commit().setMessage(tag.toString()).call();
     git.push().call();
   }
 }
-
-
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
