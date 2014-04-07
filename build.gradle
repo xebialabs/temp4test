@@ -62,7 +62,7 @@ task checkRepositoryIsClean(type: CheckRepoClean) {
   dryRun = true
   group = 'Verification'
   gitDir = project.file(project.rootProject.projectDir.path + "/.git")
-   if (!gitDir.exists()) {
+  if (!gitDir.exists()) {
     throw GradleException("Cannot release from a non version controlled tree.")
   }
 }
@@ -101,6 +101,7 @@ task releaseMinor(type: CreateTag) {
   dependsOn build, distribution
   // before building distribution hook up the check tasks
   distribution.dependsOn checkReleaseTagIsAbsent, checkRepositoryIsClean //, checkNoSnapshotDependencies
+
   doFirst {
     // could do repo clean check also in doFirst, has benefit that we can do all the checks and then abort
     // in stead of failing at the first check task
@@ -114,15 +115,34 @@ task releaseMinor(type: CreateTag) {
     file('version.properties').withWriter  { w ->
       versionProps.store(w, 'version info')
     }
-
+    CredentialsProvider cp = new CredentialsProvider() {
+      public boolean supports(CredentialItem... items) {
+        return true;
+      }
+      public boolean isInteractive() {
+          return true;
+      }
+      public boolean get(URIish uri, CredentialItem... items) throws UnsupportedCredentialItem {
+        items.each {
+          if (it instanceof CredentialItem.StringType) {
+            CredentialItem.StringType st = (CredentialItem.StringType) it
+            logger.debug("CredentialItem promptText: '${st.promptText}'")
+            st.setValue(new String(pass));
+          }
+        }
+        return true;
+      }
+    }
     FileRepository repo = new FileRepositoryBuilder().setGitDir(gitDir).build()
     def git = new Git(repo)
     git.add().addFilepattern('version.properties').call();
     git.commit().setMessage(tag.toString()).call();
-    git.push().call();
+    git.push().setCredentialsProvider(cp).setPushTags().call();
   }
 }
 
+import org.eclipse.jgit.errors.UnsupportedCredentialItem
+import org.eclipse.jgit.transport.*
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.lib.Ref
