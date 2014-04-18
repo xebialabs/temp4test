@@ -8,7 +8,6 @@ ext {
 apply plugin: 'release-plugin'
 
 configurations {
-  // configuration used by plugins to enumerate jars that need to be added to the distribution zip
   distBundle
 }
 
