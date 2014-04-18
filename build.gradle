@@ -1,11 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
-
-ext {
-  releaseTasks = [ 'build', 'uploadArchives']
-}
-
 apply plugin: 'release-plugin'
+
+release {
+  releaseTasks = [ 'build' ]
+}
 
 configurations {
   distBundle
