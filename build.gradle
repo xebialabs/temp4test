@@ -18,3 +18,7 @@ dependencies {
   // 
   distBundle 'com.xebialabs.deployit:engine-api:4.0.0'
 }
+
+subprojects.each { p ->
+	p.apply plugin: 'java'
+}
