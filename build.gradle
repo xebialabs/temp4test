@@ -2,10 +2,6 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'release-plugin'
 
-release {
-  releaseTasks = [ 'build' ]
-}
-
 configurations {
   distBundle
 }
@@ -21,4 +17,17 @@ dependencies {
 
 subprojects.each { p ->
 	p.apply plugin: 'java'
+}
+
+allprojects.each { p->
+  p.tasks.create('uploadArchives').configure {
+    doLast {
+      println "Uploading ${project.jar.outputs.files.files}"
+    }
+  }
+}
+
+release {
+  //releaseTasks = [ ':build', ':uploadArchives', ':sub1:uploadArchives', ':sub2:uploadArchives' ]
+  releaseTasks = project.getTasksByName('uploadArchives', true) + project.getTasksByName('build', true)
 }
