@@ -6,6 +6,7 @@ configurations {
 
 subprojects.each { p ->
   p.apply plugin: 'deployit-java'
+  p.apply plugin: 'deployit-artifact'
 }
 
 release {
