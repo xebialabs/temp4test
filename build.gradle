@@ -9,7 +9,7 @@ subprojects.each { p ->
   p.apply plugin: 'deployit-artifact'
 }
 
-//release {
+release {
   //releaseTasks = [ ':build', ':uploadArchives', ':sub1:uploadArchives', ':sub2:uploadArchives' ]
-  //releaseTasks = project.getTasksByName('uploadArchives', true) + project.getTasksByName('build', true)
-//}
+  releaseTasks = project.getTasksByName('uploadArchives', true) + project.getTasksByName('build', true)
+}
