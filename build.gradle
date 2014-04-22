@@ -7,9 +7,6 @@ configurations {
 subprojects.each { p ->
 	p.apply plugin: 'java'
 	p.apply plugin: 'eclipse'
-}
-
-allprojects.each { p->
   p.tasks.create('uploadArchives').configure {
     doLast {
       println "Uploading ${project.jar.outputs.files.files}"
