@@ -5,13 +5,7 @@ configurations {
 }
 
 subprojects.each { p ->
-	p.apply plugin: 'java'
-	p.apply plugin: 'eclipse'
-  p.tasks.create('uploadArchives').configure {
-    doLast {
-      println "Uploading ${project.jar.outputs.files.files}"
-    }
-  }
+  p.apply plugin: 'deployit-java'
 }
 
 release {
