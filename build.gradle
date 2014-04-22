@@ -1,22 +1,12 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'release-plugin'
 
 configurations {
   distBundle
 }
 
-dependencies {
-  compile 'org.eclipse.jgit:org.eclipse.jgit:2.0.0.201206130900-r'
-  // snapshot for testing
-  compile 'com.xebialabs.deployit:engine-api:4.0.0'
-
-  // 
-  distBundle 'com.xebialabs.deployit:engine-api:4.0.0'
-}
-
 subprojects.each { p ->
 	p.apply plugin: 'java'
+	p.apply plugin: 'eclipse'
 }
 
 allprojects.each { p->
