@@ -1,15 +1,7 @@
 apply plugin: 'release-plugin'
 
-configurations {
-  distBundle
-}
-
 subprojects.each { p ->
   p.apply plugin: 'deployit-java'
   p.apply plugin: 'deployit-artifact'
 }
 
-//release {
-  //releaseTasks = [ ':build', ':uploadArchives', ':sub1:uploadArchives', ':sub2:uploadArchives' ]
-  //releaseTasks = project.getTasksByName('uploadArchives', true) + project.getTasksByName('build', true)
-//}
