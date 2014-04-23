@@ -1,0 +1,4 @@
+
+dependencies {
+  compile 'com.xebialabs.deployit:udm-plugin-api:4.1.0-alpha-1'
+}
