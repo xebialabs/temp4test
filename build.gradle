@@ -1,20 +1,17 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
+
+apply plugin: 'commercial-plugin'
 apply plugin: 'release-plugin'
 
-release {
-  releaseTasks = [ 'build' ]
-}
+docgen.temp4testPluginManual = [title: 'Test Plugin Manual', appendCiReference: true, prefixes: 'temp4test', 'DATABASE_USERNAME': '{{DATABASE_USERNAME}}', 'DATABASE_PASSWORD': '{{DATABASE_PASSWORD}}']
 
-configurations {
-  distBundle
+thirdPartyLicense {
+  reportHeader = """This notice contains information about the OSS software used in the XL Deploy
+Temp4test plugin. The plugin contains the following OSS components grouped by\nlicense:
+"""
 }
 
 dependencies {
   compile 'org.eclipse.jgit:org.eclipse.jgit:2.0.0.201206130900-r'
-  // snapshot for testing
   compile 'com.xebialabs.deployit:engine-api:4.0.0'
-
-  // 
-  distBundle 'com.xebialabs.deployit:engine-api:4.0.0'
 }
+
