@@ -1,1 +1,13 @@
 apply plugin: 'release-plugin'
+
+subprojects*.afterEvaluate { p ->
+  def uploadTasks = p.rootProject.getTasksByName('uploadArchives', true) + p.rootProject.getTasksByName('uploadDocumentation', true)
+
+  uploadTasks.each { uploadTask ->
+    project.getTasksByName('build', true).each { buildTask ->
+      println "uploadTask $uploadTask must run after $buildTask"
+      uploadTask.mustRunAfter buildTask
+    }
+  }
+}
+
