@@ -4,6 +4,7 @@ apply plugin: 'commercial-plugin'
 docgen.testManual = [title: 'Test Plugin Manual', appendCiReference: true, prefixes: ['overthere', 'test', 'generic'], 'DATABASE_USERNAME': '{{DATABASE_USERNAME}}', 'DATABASE_PASSWORD': '{{DATABASE_PASSWORD}}']
 
 dependencies {
-  compile 'com.xebialabs.deployit:udm-plugin-api:4.1.0-alpha-1'
+  // compile 'com.xebialabs.deployit:udm-plugin-api:4.1.0-alpha-1'
+  compile 'com.xebialabs.deployit:udm-plugin-api:4.0.0'
 }
 
