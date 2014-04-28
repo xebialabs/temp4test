@@ -1,1 +1,1 @@
-include 'sub1', 'sub2'
+include 'commercial-plugin', 'java-module', 'deployit-plugin'

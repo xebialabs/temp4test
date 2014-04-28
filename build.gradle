@@ -1,7 +1,1 @@
 apply plugin: 'release-plugin'
-
-subprojects.each { p ->
-  p.apply plugin: 'deployit-java'
-  p.apply plugin: 'deployit-artifact'
-}
-
