@@ -8,3 +8,7 @@ dependencies {
   compile 'com.xebialabs.deployit:udm-plugin-api:4.0.0'
 }
 
+uploadDocumentation {
+  projectPath = "temp4test"
+}
+
