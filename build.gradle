@@ -1,2 +1,5 @@
+apply plugin: 'document-combined-archive'
 apply plugin: 'release-plugin'
+
+group = 'com.xebialabs.deployit.temp4test'
 
