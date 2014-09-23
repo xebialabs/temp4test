@@ -5,8 +5,8 @@ apply plugin: 'release-plugin'
 group = 'com.xebialabs.deployit.temp4test'
 
 releaseNotes {
-  fixVersionTemplate = 'xl-deploy-4.5.2'
-//  fixVersionTemplate = 'xl-deploy-4.5.1'
+//  fixVersionTemplate = 'xl-deploy-4.5.2'
+  fixVersionTemplate = 'xl-deploy-4.5.1'
   includedTypesWithHeaders = [
       "Bug": "Bug fixes",
       "Improvement": "Improvements",
