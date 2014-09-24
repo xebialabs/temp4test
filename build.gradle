@@ -1,6 +1,6 @@
 apply plugin: 'document-combined-archive'
-apply plugin: 'release-plugin'
 apply plugin: 'release-notes-plugin'
+apply plugin: 'release-plugin'
 
 releaseNotes {
   fixVersionTemplate = 'xl-deploy-4.5.2'
