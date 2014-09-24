@@ -1,3 +1,4 @@
 // bundled plugin like
 apply plugin: 'deployit-plugin'
 apply plugin: 'document-generator'
+apply plugin: 'release-plugin'
