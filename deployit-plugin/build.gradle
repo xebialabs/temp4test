@@ -1,15 +1,3 @@
 // bundled plugin like
 apply plugin: 'deployit-plugin'
 apply plugin: 'document-generator'
-apply plugin: 'release-notes-plugin'
-
-releaseNotes {
-  fixVersionTemplate = 'xl-deploy-4.5.2'
-//  fixVersionTemplate = 'xl-deploy-4.5.1'
-  includedTypesWithHeaders = [
-      "Bug": "Bug fixes",
-      "Improvement": "Improvements",
-      "Task": "Tasks"
-  ]
-  jqlTemplate = 'fixVersion=%s and resolution in (Unresolved,Done,Fixed) and type = Bug'
-}
