@@ -26,7 +26,7 @@
         <plugin.testrunner.version>1.1</plugin.testrunner.version>
         <slf4j.version>1.7.5</slf4j.version>
         <!-- property name is used by dependency updater do not change -->
-        <xlPlatformVersion>2014.10.x</xlPlatformVersion>
+        <xlPlatformVersion>0.0.0-alpha-UNDEFINED</xlPlatformVersion>
     </properties>
 
     <dependencies>
