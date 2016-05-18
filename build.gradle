@@ -27,4 +27,5 @@ allprojects {
   apply plugin: 'idea'
 }
 
-print "done"
+println "Root project done"
+
