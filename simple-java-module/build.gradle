@@ -1,0 +1,10 @@
+
+apply plugin: "java"
+apply plugin: "xebialabs.opinions"
+apply plugin: "xebialabs.artifact"
+
+// this gets us slf4j-api as added by opinions
+// and a guava that's managed upwards
+dependencies {
+  compile "nl.javadude.t2bus:t2-bus"
+}

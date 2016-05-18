@@ -1,6 +1,30 @@
-apply plugin: 'document-combined-archive'
-apply plugin: 'release-plugin'
+buildscript {
+  repositories {
+    mavenLocal()
+    ['releases', 'public'].each { r ->
+      maven {
+        url "${nexusBaseUrl}/repositories/${r}"
+          credentials {
+            username nexusUserName
+            password nexusPassword
+        }
+      }
+    }
+  }
 
-group = 'com.xebialabs.deployit.temp4test'
+  dependencies {
+    classpath "com.xebialabs.gradle.plugins:gradle-xl-defaults-plugin:0.2.3-dev.0.uncommitted+ffaf069"
+    classpath "com.xebialabs.gradle.plugins:gradle-xl-restdoc-plugin:0.1.0"
+    classpath "com.xebialabs.gradle.plugins:gradle-xl-dependency-plugin:1.2.2"
+  }
+}
+
+apply plugin: 'xebialabs.root.opinions'
+apply plugin: 'xebialabs.dependency'
+
+allprojects {
+  group = 'com.xebialabs.deployit.temp4test'
+  apply plugin: 'idea'
+}
 
 print "done"

@@ -1,7 +1,10 @@
 // java modules like plugin-api/engine etc.
-apply plugin: 'deployit-java'
-apply plugin: 'deployit-artifact'
-apply plugin: 'restdoc'
+
+apply plugin: "java"
+apply plugin: "xebialabs.opinions"
+apply plugin: "xebialabs.artifact"
+
+/* apply plugin: 'restdoc'
 
 restdoc {
   printJson = false
@@ -11,7 +14,8 @@ restdoc {
 uploadDocumentation {
   projectPath = "t4t"
 }
-
 dependencies {
   compile project(':commercial-plugin')
 }
+*/
+

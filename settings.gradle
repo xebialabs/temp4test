@@ -1,1 +1,2 @@
-include 'commercial-plugin', 'java-module', 'deployit-plugin'
+//include 'commercial-plugin', 'java-module', 'deployit-plugin'
+include 'simple-java-module'
