@@ -13,7 +13,7 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.xebialabs.gradle.plugins:gradle-xl-defaults-plugin:0.2.3-dev.0.uncommitted+ffaf069"
+    classpath "com.xebialabs.gradle.plugins:gradle-xl-defaults-plugin:0.2.3-dev.1.uncommitted+4a314e3"
     classpath "com.xebialabs.gradle.plugins:gradle-xl-restdoc-plugin:0.1.0"
     classpath "com.xebialabs.gradle.plugins:gradle-xl-dependency-plugin:1.2.2"
   }
