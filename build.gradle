@@ -29,14 +29,15 @@ allprojects { p ->
 pluginManager.withPlugin 'org.ajoberstar.release-base', {
   subprojects { p ->
     p.tasks.all { t ->
+      def releaseTask = rootProject.tasks.release
       if (t.name == 'uploadArchives') {
-        logger.info("Release task ${p.tasks.release} depends on ${t}")
-        rootProject.tasks['release'].dependsOn t
+        logger.info("Release task ${releaseTask} depends on ${t}")
+        releaseTask.dependsOn t
       }
     }
     p.tasks.findAll({ it.name == 'build' }).each { Task buildTask ->
-      logger.info("${p.tasks.release} depends on ${buildTask}")
-      rootProject.tasks['release'].dependsOn buildTask
+      logger.info("${releaseTask} depends on ${buildTask}")
+      releaseTask.dependsOn buildTask
     }
   }
 }
