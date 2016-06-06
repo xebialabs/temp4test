@@ -25,9 +25,11 @@ allprojects { p ->
 
   p.apply plugin: 'idea'
 
-  p.tasks.findByName('uploadArchives')?.with { Task uploadTask ->
-    log.info("Release task ${p.tasks.release} depends on ${uploadTask}")
-    rootProject.tasks.release.dependsOn uploadTask
+  p.tasks.all { t ->
+    if (t.name == 'uploadArchives') {
+      log.info("Release task ${p.tasks.release} depends on ${t}")
+      rootProject.tasks.release.dependsOn t
+    }
   }
   p.tasks.findAll({ it.name == 'build' }).each { Task buildTask ->
     log.info("${p.tasks.release} depends on ${buildTask}")
