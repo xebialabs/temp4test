@@ -1,16 +1,11 @@
 // commercial plugin like
-/*
-apply plugin: 'commercial-plugin'
+
+apply plugin: "xebialabs.opinions"
+apply plugin: "xebialabs.plugin.xld"
 
 docgen.testManual = [title: 'Test Plugin Manual', appendCiReference: true, prefixes: ['overthere', 'test', 'generic'], 'DATABASE_USERNAME': '{{DATABASE_USERNAME}}', 'DATABASE_PASSWORD': '{{DATABASE_PASSWORD}}']
 
 dependencies {
   // compile 'com.xebialabs.deployit:udm-plugin-api:4.1.0-alpha-1'
-  compile 'com.xebialabs.deployit:udm-plugin-api:4.0.0'
+  compile 'com.xebialabs.deployit:udm-plugin-api:2016.1.2'
 }
-
-uploadDocumentation {
-  projectPath = "temp4test"
-}
-
-*/

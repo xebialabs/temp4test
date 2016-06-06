@@ -3,19 +3,13 @@
 apply plugin: "java"
 apply plugin: "xebialabs.opinions"
 apply plugin: "xebialabs.artifact"
-
-/* apply plugin: 'restdoc'
+apply plugin: "xebialabs.restdoc"
 
 restdoc {
   printJson = false
   productName = "t4t"
 }
 
-uploadDocumentation {
-  projectPath = "t4t"
-}
 dependencies {
   compile project(':commercial-plugin')
 }
-*/
-
