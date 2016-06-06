@@ -24,19 +24,22 @@ allprojects { p ->
   group = 'com.xebialabs.deployit.temp4test'
 
   p.apply plugin: 'idea'
-
-  p.tasks.all { t ->
-    if (t.name == 'uploadArchives') {
-      logger.info("Release task ${p.tasks.release} depends on ${t}")
-      rootProject.tasks.release.dependsOn t
-    }
-  }
-  p.tasks.findAll({ it.name == 'build' }).each { Task buildTask ->
-    logger.info("${p.tasks.release} depends on ${buildTask}")
-    rootProject.tasks.releases.dependsOn buildTask
-  }
 }
 
+pluginManager.withPlugin 'org.ajoberstar.release-base', {
+  subprojects { p ->
+    p.tasks.all { t ->
+      if (t.name == 'uploadArchives') {
+        logger.info("Release task ${p.tasks.release} depends on ${t}")
+        rootProject.tasks['release'].dependsOn t
+      }
+    }
+    p.tasks.findAll({ it.name == 'build' }).each { Task buildTask ->
+      logger.info("${p.tasks.release} depends on ${buildTask}")
+      rootProject.tasks['release'].dependsOn buildTask
+    }
+  }
+}
 
 
 println "Root project done"
