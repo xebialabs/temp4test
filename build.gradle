@@ -12,6 +12,7 @@ buildscript {
     }
   }
   dependencies {
+    // classpath "com.xebialabs.gradle.plugins:gradle-xl-release-plugin:1.1.6-SNAPSHOT"
     classpath "com.xebialabs.gradle.plugins:gradle-xl-plugins-plugin:${xlPluginPluginVersion}"
     classpath "com.xebialabs.gradle.plugins:gradle-xl-restdoc-plugin:${xlRestDocPluginVersion}"
   }
@@ -25,23 +26,6 @@ allprojects { p ->
 
   p.apply plugin: 'idea'
 }
-
-pluginManager.withPlugin 'org.ajoberstar.release-base', {
-  subprojects { p ->
-    p.tasks.all { t ->
-      def releaseTask = rootProject.tasks.release
-      if (t.name == 'uploadArchives') {
-        logger.info("Release task ${releaseTask} depends on ${t}")
-        releaseTask.dependsOn t
-      }
-    }
-    p.tasks.findAll({ it.name == 'build' }).each { Task buildTask ->
-      logger.info("${releaseTask} depends on ${buildTask}")
-      releaseTask.dependsOn buildTask
-    }
-  }
-}
-
 
 println "Root project done"
 
