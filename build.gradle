@@ -27,12 +27,12 @@ allprojects { p ->
 
   p.tasks.all { t ->
     if (t.name == 'uploadArchives') {
-      log.info("Release task ${p.tasks.release} depends on ${t}")
+      logger.info("Release task ${p.tasks.release} depends on ${t}")
       rootProject.tasks.release.dependsOn t
     }
   }
   p.tasks.findAll({ it.name == 'build' }).each { Task buildTask ->
-    log.info("${p.tasks.release} depends on ${buildTask}")
+    logger.info("${p.tasks.release} depends on ${buildTask}")
     rootProject.tasks.releases.dependsOn buildTask
   }
 }
