@@ -1,3 +1,9 @@
 // bundled plugin like
-//apply plugin: 'deployit-plugin'
-//apply plugin: 'document-generator'
+apply plugin: "java"
+apply plugin: "xebialabs.artifact"
+apply plugin: "xebialabs.plugin-bundle"
+apply plugin: "xebialabs.document-generator"
+
+xlPlugin {
+  extension = 'xldp'
+}
