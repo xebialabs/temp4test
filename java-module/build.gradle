@@ -4,6 +4,7 @@ apply plugin: "java"
 apply plugin: "xebialabs.opinions"
 apply plugin: "xebialabs.artifact"
 apply plugin: "xebialabs.restdoc"
+apply plugin: "xebialabs.sources"
 
 restdoc {
   printJson = false
