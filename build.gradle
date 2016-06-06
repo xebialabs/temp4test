@@ -20,11 +20,22 @@ buildscript {
 apply plugin: 'xebialabs.root.opinions'
 apply plugin: 'xebialabs.dependency'
 
-allprojects {
+allprojects { p ->
   group = 'com.xebialabs.deployit.temp4test'
 
-  apply plugin: 'idea'
+  p.apply plugin: 'idea'
+
+  p.tasks.findByName('uploadArchives')?.with { Task uploadTask ->
+    log.info("Release task ${p.tasks.release} depends on ${uploadTask}")
+    rootProject.tasks.release.dependsOn uploadTask
+  }
+  p.tasks.findAll({ it.name == 'build' }).each { Task buildTask ->
+    log.info("${p.tasks.release} depends on ${buildTask}")
+    rootProject.tasks.releases.dependsOn buildTask
+  }
 }
+
+
 
 println "Root project done"
 
