@@ -12,7 +12,7 @@ buildscript {
     }
   }
   dependencies {
-    // classpath "com.xebialabs.gradle.plugins:gradle-xl-release-plugin:1.1.6-SNAPSHOT"
+    // classpath "com.xebialabs.gradle.plugins:gradle-xl-release-plugin:1.1.7-SNAPSHOT"
     classpath "com.xebialabs.gradle.plugins:gradle-xl-plugins-plugin:${xlPluginsPluginVersion}"
     classpath "com.xebialabs.gradle.plugins:gradle-xl-restdoc-plugin:${xlRestDocPluginVersion}"
   }
@@ -28,4 +28,3 @@ allprojects { p ->
 }
 
 println "Root project done"
-
