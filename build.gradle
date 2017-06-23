@@ -19,7 +19,6 @@ buildscript {
 }
 
 apply plugin: 'xebialabs.root.opinions'
-apply plugin: 'xebialabs.dependency'
 
 allprojects { p ->
   group = 'com.xebialabs.deployit.temp4test'
