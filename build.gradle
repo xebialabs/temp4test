@@ -20,6 +20,11 @@ buildscript {
 
 apply plugin: 'xebialabs.root.opinions'
 apply plugin: 'xebialabs.opinions'
+apply plugin: 'com.xebialabs.dependency'
+
+dependencyManagement {
+  importConf file("gradle/dependencies.conf")
+}
 
 allprojects { p ->
   group = 'com.xebialabs.deployit.temp4test'
